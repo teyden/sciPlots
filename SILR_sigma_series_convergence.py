@@ -40,7 +40,7 @@ N0 = S0 + I0
 
 Y0 = [ S0, I0, L0 ]
 
-tMax = 1000
+tMax = 730
 
 # Time vector for solution
 T = scipy.linspace(0, tMax, 1001)
@@ -78,8 +78,8 @@ def rhs(Y, t, alpha, sigma, lambd, rho, mu):
 
 # Using for loop to output more sigma conditions 
 sigmaRates = np.linspace(0.01, a/2.0, num=4)
-sigmaRates = np.linspace(0.01, a/2.0, num=4)
-sigmaRates = [0.0, a/100, a/10, a/4, a/3, a/2]
+sigmaRates = np.linspace(a/2.0, a, num=6)
+# sigmaRates = [0.0, a/100, a/10, a/4, a/3, a/2]
 print sigmaRates
 
 traceConditions = []   ## To plot for different lambda and alpha conditions
@@ -246,4 +246,4 @@ for i, item in enumerate(traceConditions):
   fig['layout'][xaxis].update(title='time (days)')
   fig['layout'][yaxis].update(title='population')
 
-py.image.save_as(fig, 'EVD-SILR_sigma_multi_1000x1000_v3.png')
+py.image.save_as(fig, 'EVD-SILR_sigma_multi_1000x1000_converge_v2.png')

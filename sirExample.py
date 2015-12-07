@@ -8,18 +8,22 @@ import scipy, scipy.integrate
 
 
 # Parameters
+# beta = 0.27
+# gamma = 0.74
+# mu = 1.0 / 5.61  # Warning!  int / int = int, e.g. 1 / 50 = 0.
+
 beta = 5
 gamma = 1
 mu = 1.0 / 50  # Warning!  int / int = int, e.g. 1 / 50 = 0.
 
 # Initial condition
 S0 = 0.99
-I0 = 0.01
+I0 = 0.00001
 R0 = 0.00
 
 Y0 = [ S0, I0, R0 ]
 
-tMax = 100
+tMax = 730
 
 # Time vector for solution
 T = scipy.linspace(0, tMax, 1001)
@@ -43,8 +47,8 @@ def rhs(Y, t, beta, gamma, mu):
     N = S + I + R
     
     # The right-hand sides
-    dS = mu * N - beta * I * S / N - mu * S
-    dI = beta * I * S / N - (gamma + mu) * I
+    dS = mu * N - beta * I * S - mu * S
+    dI = beta * I * S - (gamma + mu) * I
     dR = gamma * I - mu * R
     
     # Convert meaningful component vectors into a single vector
@@ -66,13 +70,6 @@ I = solution[:, 1]
 R = solution[:, 2]
 
 N = S + I + R
-
-# from plotter import scatter_builder_plotly, plot_with_plotly
-
-# traceS = scatter_builder_plotly(X=T, Y=S/N)
-# traceI = scatter_builder_plotly(X=T, Y=I/N)
-# traceR = scatter_builder_plotly(X=T, Y=R/N)
-# plot_with_plotly(X=T, Y=S/N, {'x': 'time', 'y': '# people', 'title': 'SIR model'}, trace=[traceS, traceI, traceR])
 
 # # Make plots
 
@@ -96,3 +93,82 @@ pylab.legend([ 'Susceptible', 'Infective', 'Recovered' ])
 # Actually display the plot
 pylab.show()
 
+
+# ############ Using Plot.ly ############
+# from plotter import scatter_builder_plotly, plot_with_plotly
+# import plotly.plotly as py 
+# from plotly.graph_objs import *
+# teal = 'rgb(89,142,146)'
+# red = 'rgb(197,22,22)'
+# blue = 'rgb(13,86,172)'
+# orange = 'rgb(218,135,60)'
+# purple = 'rgb(159,98,225)'
+# pink = 'rgb(223,98,225)'
+# plum = 'rgb(22,9,22)'
+# green = 'rgb(34,149,34)'
+# colors = [teal, red, blue, orange, purple, pink, plum, green]
+
+# ## Define traces for each curve 
+# traceS=Scatter( 
+#   x=T, 
+#   y=S/N,
+#   mode='lines',
+#   name='Susceptible',
+#   marker=Marker(
+#     symbol='x',
+#     size=9
+#     ),
+#   line=Line(color=blue, width=1.0)
+# )
+
+# traceI=Scatter( 
+#   x=T, 
+#   y=I/N,
+#   mode='lines',
+#   name='Infective',
+#   marker=Marker(
+#     symbol='x',
+#     size=9
+#     ),
+#   line=Line(color=red, width=1.0)
+# )
+
+# traceR=Scatter( 
+#   x=T, 
+#   y=R/N,
+#   mode='lines',
+#   name='Removed',
+#   marker=Marker(
+#     symbol='x',
+#     size=9
+#     ),
+#   line=Line(color=teal, width=1.0)
+# )
+
+# fig = Figure(
+#   data=Data([traceS, traceI, traceR]), 
+#   layout=Layout(
+#     title='Ebola Virus Disease SIR Model',
+#     xaxis=XAxis(
+#       title='Time (days)',
+#       showgrid=True,
+#       zeroline=True,
+#       gridwidth=0.5
+#       ),
+#     yaxis=YAxis(
+#       title='Population',
+#       showgrid=True,
+#       zeroline=True,
+#       gridwidth=0.5
+#       ),
+#     font=dict(
+#       size=12
+#       ),
+#     titlefont=dict(
+#       size=16
+#       )
+#     )
+#   )
+
+# fig['layout'].update(height=1000, width=1000, title='Ebola Virus Disease SIR Model (alpha = 0.27)')
+# py.image.save_as(fig, 'EVD-SIR.png')

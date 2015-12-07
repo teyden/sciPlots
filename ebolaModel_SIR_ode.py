@@ -21,6 +21,24 @@ plum = 'rgb(22,9,22)'
 green = 'rgb(34,149,34)'
 colors = [teal, red, blue, orange, purple, pink, plum, green]
 
+# Parameters
+a = 0.27            # alpha - rate of infection
+l = 1.0 / 5.61      # lambda - rate of recovery (1 / lambda = avg duration of illness)
+m = 0.74            # mu - rate of removal by  
+
+# Initial condition
+S0 = 100000.0
+I0 = 1.0
+R0 = 0.0
+N = S0 + I0 + R0
+
+Y0 = [ S0, I0, R0 ]
+
+tMax = 730
+
+# Time vector for solution
+T = scipy.linspace(0, tMax, 1001)
+
 # This defines a function that is the right-hand side of the ODEs
 def rhs(Y, t, alpha, lambd, mu):
     '''
@@ -35,33 +53,21 @@ def rhs(Y, t, alpha, lambd, mu):
     R = Y[2]
     
     N = S + I + R
+    # alpha = alpha / N0
     
     # The right-hand sides
+    # dS = -1 * alpha * S * I / N 
+    # dI = alpha * S * I / N - lambd * I
+    # dR = lambd * I 
+
     dS = mu * N - alpha * I * S / N - mu * S
     dI = alpha * I * S / N - (lambd + mu) * I
     dR = lambd * I - mu * R
-    
+
     # Convert meaningful component vectors into a single vector
     dY = [ dS, dI, dR ]
 
     return dY
-
-# Parameters
-a = 0.27			        # alpha
-l = 1.0 / 33.0			# lambda
-m = 1.0 / 60.0	    # mu
-
-# Initial condition
-S0 = 100000
-I0 = 1
-R0 = 0
-
-Y0 = [ S0, I0, R0 ]
-
-tMax = 730
-
-# Time vector for solution
-T = scipy.linspace(0, tMax, 1001)
 
 solution = scipy.integrate.odeint(rhs,
                                   Y0,
@@ -73,46 +79,10 @@ S = solution[:, 0]
 I = solution[:, 1]
 R = solution[:, 2]
 
-# alphaRates = np.linspace(0.00, 5.0, num=8) 
-# illnessDurations = range(5, 20, 2)
-# traces = []
-# traceConditions = []	 ## To plot for different lambda and alpha conditions
-
-# for k in range(len(illnessDurations)):
-# 	a = alphaRates[k]
-# 	for x in range(len(illnessDurations)):
-# 		l = 1 / float(illnessDurations[x])
-# 		m = 1.0 / 60.0
-
-# 		solution = scipy.integrate.odeint(rhs,
-# 		                                  Y0,
-# 		                                  T,
-# 		                                  args = (a, l, m))
-
-# 		S = solution[:, 0]
-# 		I = solution[:, 1]
-# 		R = solution[:, 2]
-
-# 		trace=Scatter( 
-# 		  x=T, 
-# 		  y=I,
-# 		  mode='lines',
-# 		  name='%s day duration' % illnessDurations[x],
-# 		  marker=Marker(
-# 		    symbol='x',
-# 		    size=9
-# 		    ),
-# 		  line=Line(color=colors[x], width=1.0)
-# 		)
-
-# 		traces.append(trace)
-
-# 	traceConditions.append(traces)
-# 	traces = []
-
+## Define traces for each curve via Plot.ly library 
 traceS=Scatter( 
   x=T, 
-  y=S,
+  y=S/N,
   mode='lines',
   name='Susceptible',
   marker=Marker(
@@ -124,7 +94,7 @@ traceS=Scatter(
 
 traceI=Scatter( 
   x=T, 
-  y=I,
+  y=I/N,
   mode='lines',
   name='Infective',
   marker=Marker(
@@ -136,7 +106,7 @@ traceI=Scatter(
 
 traceR=Scatter( 
   x=T, 
-  y=R,
+  y=R/N,
   mode='lines',
   name='Removed',
   marker=Marker(
@@ -145,18 +115,19 @@ traceR=Scatter(
     ),
   line=Line(color=teal, width=1.0)
 )
-figure = Figure(
+
+fig = Figure(
   data=Data([traceS, traceI, traceR]), 
   layout=Layout(
     title='Ebola Virus Disease SIR Model',
     xaxis=XAxis(
-      title='Time',
+      title='Time (days)',
       showgrid=True,
       zeroline=True,
       gridwidth=0.5
       ),
     yaxis=YAxis(
-      title='Proportion',
+      title='Population',
       showgrid=True,
       zeroline=True,
       gridwidth=0.5
@@ -169,6 +140,10 @@ figure = Figure(
       )
     )
   )
+
+fig['layout'].update(height=1000, width=1000, title='Ebola Virus Disease SIR Model (alpha = 0.27)')
+py.image.save_as(fig, 'EVD-SIR.png')
+
 
 # figure = Figure(
 #   data=Data(traceConditions[1]), 
@@ -194,4 +169,4 @@ figure = Figure(
 #       )
 #     )
 #   )
-py.plot(figure, filename='EVD-SIR', stream=Stream(token='hzb6rmog52', maxpoints=1000))
+# py.plot(figure, filename='EVD-SIR', stream=Stream(token='hzb6rmog52', maxpoints=1000))
